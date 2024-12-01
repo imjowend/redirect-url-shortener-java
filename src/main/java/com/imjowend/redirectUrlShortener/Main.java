@@ -1,4 +1,4 @@
-package com.imjowend.createUrlShortener;
+package com.imjowend.redirectUrlShortener;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Main implements RequestHandler<Map<String, Object>, Map<String, String>> {
+public class Main implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
     private final S3Client s3Client = S3Client.builder().build();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -45,18 +45,20 @@ public class Main implements RequestHandler<Map<String, Object>, Map<String, Str
         }
 
         long currentTimeInSeconds = System.currentTimeMillis() / 1000;
-        if (currentTimeInSeconds < urlData.getExpirationTime()){
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", 302);
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Location", urlData.getOriginalUrl());
-            response.put("headers", headers);
+        Map<String, Object> response = new HashMap<>();
 
+        // cenario onde a URL expirou
+        if (urlData.getExpirationTime() < currentTimeInSeconds){
+            response.put("status", 410);
+            response.put("body", "This URL has expired.");
             return response;
         }
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", 410);
-        response.put("body", "This URL has expired.");
+        // cenario onde a URL ainda é válida
+        response.put("statusCode", 302);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Location", urlData.getOriginalUrl());
+        response.put("headers", headers);
+
         return response;
     }
 }

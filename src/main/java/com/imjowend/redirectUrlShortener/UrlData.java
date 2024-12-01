@@ -1,12 +1,14 @@
-package com.imjowend.createUrlShortener;
+package com.imjowend.redirectUrlShortener;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Setter
 @Getter
-@AllArgsConstructor
 public class UrlData {
 
     private String originalUrl;
